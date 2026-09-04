@@ -129,6 +129,7 @@ def run_distractor_scaling():
 
     # Copy to paper/
     import shutil
+    os.makedirs('paper', exist_ok=True)
     shutil.copy(out_png, 'paper/mqar_distractor_scaling.png')
     print('Copied plot to paper/mqar_distractor_scaling.png')
 
