@@ -149,15 +149,16 @@ document.addEventListener("DOMContentLoaded", function() {{
 </body>
 </html>"""
 
-    # Embed image as Base64 so Edge renders it instantly without file URI restrictions
+    # Embed images as Base64 so Edge renders them instantly without file URI restrictions
     import base64
-    img_path = os.path.abspath(os.path.join('paper', 'loss_vs_compute_10m.png'))
-    if os.path.exists(img_path):
-        with open(img_path, 'rb') as img_f:
-            b64_data = base64.b64encode(img_f.read()).decode('utf-8')
-        html = html.replace('loss_vs_compute_10m.png', f'data:image/png;base64,{b64_data}')
-        html = html.replace('results/loss_vs_compute_10m.png', f'data:image/png;base64,{b64_data}')
-        print(f"Embedded base64 image ({len(b64_data)} bytes)")
+    for img_name in ['loss_vs_compute_10m.png', 'mqar_distractor_scaling.png']:
+        img_path = os.path.abspath(os.path.join('paper', img_name))
+        if os.path.exists(img_path):
+            with open(img_path, 'rb') as img_f:
+                b64_data = base64.b64encode(img_f.read()).decode('utf-8')
+            html = html.replace(img_name, f'data:image/png;base64,{b64_data}')
+            html = html.replace(f'results/{img_name}', f'data:image/png;base64,{b64_data}')
+            print(f"Embedded base64 {img_name} ({len(b64_data)} bytes)")
 
     html_path = os.path.abspath(os.path.join('paper', 'paper.html'))
     with open(html_path, 'w', encoding='utf-8') as f:
