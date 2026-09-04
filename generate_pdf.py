@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function() {{
 
     # Embed images as Base64 so Edge renders them instantly without file URI restrictions
     import base64
-    for img_name in ['loss_vs_compute_10m.png', 'mqar_distractor_scaling.png']:
+    for img_name in ['loss_vs_compute_10m.png', 'mqar_distractor_scaling.png', 'variable_gap_mqar.png']:
         img_path = os.path.abspath(os.path.join('paper', img_name))
         if os.path.exists(img_path):
             with open(img_path, 'rb') as img_f:
