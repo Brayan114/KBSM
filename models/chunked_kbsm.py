@@ -55,8 +55,9 @@ class ChunkedKBSM(nn.Module):
 
     def power_kernel(self, z: torch.Tensor) -> torch.Tensor:
         rect = F.relu(z)
-        sq = rect * rect + 1e-5
-        return F.normalize(sq, dim=-1)
+        sq = rect * rect
+        norm = torch.norm(sq, p=2, dim=-1, keepdim=True).clamp(min=1e-5)
+        return sq / norm
 
     def forward(
         self,

@@ -15,6 +15,7 @@ class MQARDataset:
         num_pairs: int = 8,
         num_queries: int = 4,
         vocab_size: int = 64,
+        gap: int = 1,
         seed: int = 42
     ):
         """
@@ -27,13 +28,14 @@ class MQARDataset:
                 Token 0: PAD / NOISE
                 Tokens 1 .. vocab_size // 2: Keys
                 Tokens vocab_size // 2 + 1 .. vocab_size - 1: Values
+            gap: Distance between key and value token in sequence (default: 1 = adjacent).
         """
-        assert seq_len >= (num_pairs * 2 + num_queries * 2), "seq_len must fit pairs and queries"
         self.num_examples = num_examples
         self.seq_len = seq_len
         self.num_pairs = num_pairs
         self.num_queries = num_queries
         self.vocab_size = vocab_size
+        self.gap = gap
         self.seed = seed
 
         self.key_min = 2
@@ -55,9 +57,15 @@ class MQARDataset:
         val_pool_size = self.val_max - self.val_min + 1
         assert key_pool_size >= self.num_pairs, "Key vocabulary too small for num_pairs"
 
-        # Split sequence: first 75% for key-value storage, last 25% for queries
+        # Split sequence: first 70% for key-value storage, last 25% for queries
         storage_len = int(self.seq_len * 0.70)
         query_start = int(self.seq_len * 0.75)
+
+        min_slots_needed = self.num_pairs * (self.gap + 1)
+        assert storage_len >= min_slots_needed, (
+            f"storage_len ({storage_len}) too short for {self.num_pairs} pairs with gap {self.gap}"
+        )
+        max_base = storage_len - 1 - ((self.num_pairs - 1) * (self.gap + 1) + self.gap)
 
         for i in range(self.num_examples):
             # 1. Sample keys and values
@@ -68,12 +76,11 @@ class MQARDataset:
             # Map key to value for quick lookup
             kv_map = {k.item(): v.item() for k, v in zip(keys, vals)}
 
-            # 2. Place pairs in storage region
-            # We need 2 * num_pairs non-overlapping positions
-            avail_pos = torch.randperm(storage_len - 1)[:self.num_pairs * 2].sort().values
+            # 2. Place pairs in storage region with distance = self.gap
+            base_offsets = torch.randperm(max_base + 1)[:self.num_pairs].sort().values
             for p_idx in range(self.num_pairs):
-                k_pos = avail_pos[p_idx * 2]
-                v_pos = k_pos + 1
+                k_pos = base_offsets[p_idx].item() + p_idx * (self.gap + 1)
+                v_pos = k_pos + self.gap
                 inputs[i, k_pos] = keys[p_idx]
                 inputs[i, v_pos] = vals[p_idx]
 
