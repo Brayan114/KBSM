@@ -1,0 +1,42 @@
+{
+  "M0_Transformer (O(N) KV-Cache)": {
+    "params": 140800,
+    "state_ram_bytes_512": 524288,
+    "latency_ms_per_token": 2.431000000000516,
+    "mqar_accuracy": 25.850000977516174,
+    "eval_loss": 2.1417417526245117,
+    "train_duration_s": 66.22321200370789
+  },
+  "Baseline_Thalamic (No Conv, Linear Kernel)": {
+    "params": 25516,
+    "state_ram_bytes_512": 4096,
+    "latency_ms_per_token": 1.7983999999984235,
+    "mqar_accuracy": 29.850000143051147,
+    "eval_loss": 1.6626209020614624,
+    "train_duration_s": 322.6789929866791
+  },
+  "Weapon1_ConvBinding (K=4, Linear Kernel)": {
+    "params": 25836,
+    "state_ram_bytes_512": 4096,
+    "latency_ms_per_token": 1.483199999995577,
+    "mqar_accuracy": 98.84999990463257,
+    "eval_loss": 0.08408067375421524,
+    "train_duration_s": 365.74380564689636
+  },
+  "Weapon2_PowerKernel (No Conv, Rectified Kernel)": {
+    "params": 25516,
+    "state_ram_bytes_512": 4096,
+    "latency_ms_per_token": 1.074800000083087,
+    "mqar_accuracy": 29.04999852180481,
+    "eval_loss": 1.7681025266647339,
+    "train_duration_s": 378.3856797218323
+  },
+  "Full_KBSM (Weapon 1 + 2: Conv K=4 + Power Kernel)": {
+    "params": 25836,
+    "state_ram_bytes_512": 4096,
+    "latency_ms_per_token": 2.0915999998578627,
+    "mqar_accuracy": 93.15000176429749,
+    "eval_loss": 0.20070835947990417,
+    "train_duration_s": 426.94636249542236
+  }
+}

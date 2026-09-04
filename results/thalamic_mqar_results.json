@@ -1,0 +1,34 @@
+{
+  "M0_Transformer (O(N) Cache)": {
+    "params": 140800,
+    "state_ram_bytes_512": 524288,
+    "latency_ms_per_token": 1.4503000000001265,
+    "mqar_accuracy": 25.850000977516174,
+    "eval_loss": 2.1417417526245117,
+    "train_duration_s": 48.71895623207092
+  },
+  "Ungated_MultiHead (H=4, O(1))": {
+    "params": 33708,
+    "state_ram_bytes_512": 4352,
+    "latency_ms_per_token": 1.1423999999990997,
+    "mqar_accuracy": 4.050000011920929,
+    "eval_loss": 3.4409306049346924,
+    "train_duration_s": 355.1594433784485
+  },
+  "Thalamic_Gated_SM (H=4, O(1))": {
+    "params": 33964,
+    "state_ram_bytes_512": 4352,
+    "latency_ms_per_token": 2.0862000000079206,
+    "mqar_accuracy": 3.0500000342726707,
+    "eval_loss": 3.4433212280273438,
+    "train_duration_s": 546.0541422367096
+  },
+  "Thalamic_Gated_SM (H=8, O(1))": {
+    "params": 51128,
+    "state_ram_bytes_512": 8448,
+    "latency_ms_per_token": 1.6583999999966181,
+    "mqar_accuracy": 3.9000000804662704,
+    "eval_loss": 3.4339308738708496,
+    "train_duration_s": 717.2485816478729
+  }
+}

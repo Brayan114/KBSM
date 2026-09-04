@@ -1,0 +1,128 @@
+{
+  "M0_Transformer": {
+    "params": 140800,
+    "latency_ms_per_token": 1.2196000000006535,
+    "state_memory_at_512_bytes": 524288,
+    "state_memory_scaling": {
+      "64": 65536,
+      "128": 131072,
+      "256": 262144,
+      "512": 524288
+    },
+    "mqar_accuracy": 25.65000057220459,
+    "mqar_eval_loss": 2.2093007564544678,
+    "mqar_avg_steps": 1.0,
+    "mqar_active_flops_ratio": 1.0,
+    "state_acc_in_domain": 35.39172410964966,
+    "state_acc_extrapolate": 23.20313262939453,
+    "extrapolation_ratio": 0.6556089937157972
+  },
+  "M1_DenseRecurrent": {
+    "params": 16768,
+    "latency_ms_per_token": 0.908100000003742,
+    "state_memory_at_512_bytes": 256,
+    "state_memory_scaling": {
+      "64": 256,
+      "128": 256,
+      "256": 256,
+      "512": 256
+    },
+    "mqar_accuracy": 4.250000044703484,
+    "mqar_eval_loss": 3.44777512550354,
+    "mqar_avg_steps": 1.0,
+    "mqar_active_flops_ratio": 1.0,
+    "state_acc_in_domain": 28.52083444595337,
+    "state_acc_extrapolate": 19.214527130126953,
+    "extrapolation_ratio": 0.6737014362794415
+  },
+  "M2_PlusSparsity": {
+    "params": 16768,
+    "latency_ms_per_token": 1.1259999999992942,
+    "state_memory_at_512_bytes": 256,
+    "state_memory_scaling": {
+      "64": 256,
+      "128": 256,
+      "256": 256,
+      "512": 256
+    },
+    "mqar_accuracy": 3.099999949336052,
+    "mqar_eval_loss": 3.4434657096862793,
+    "mqar_avg_steps": 1.0,
+    "mqar_active_flops_ratio": 0.25,
+    "state_acc_in_domain": 22.750000655651093,
+    "state_acc_extrapolate": 17.1452693939209,
+    "extrapolation_ratio": 0.7536381933976788
+  },
+  "M3_PlusPredictive": {
+    "params": 20864,
+    "latency_ms_per_token": 0.5530999999905362,
+    "state_memory_at_512_bytes": 256,
+    "state_memory_scaling": {
+      "64": 256,
+      "128": 256,
+      "256": 256,
+      "512": 256
+    },
+    "mqar_accuracy": 3.449999913573265,
+    "mqar_eval_loss": 3.4488320350646973,
+    "mqar_avg_steps": 1.0,
+    "mqar_active_flops_ratio": 1.0,
+    "state_acc_in_domain": 23.22843074798584,
+    "state_acc_extrapolate": 18.265413284301758,
+    "extrapolation_ratio": 0.7863386675781174
+  },
+  "M4_PlusDynamicHalting": {
+    "params": 16833,
+    "latency_ms_per_token": 0.6175999999982196,
+    "state_memory_at_512_bytes": 256,
+    "state_memory_scaling": {
+      "64": 256,
+      "128": 256,
+      "256": 256,
+      "512": 256
+    },
+    "mqar_accuracy": 3.150000050663948,
+    "mqar_eval_loss": 3.463862895965576,
+    "mqar_avg_steps": 1.1238750219345093,
+    "mqar_active_flops_ratio": 1.0,
+    "state_acc_in_domain": 23.169466853141785,
+    "state_acc_extrapolate": 17.819684982299805,
+    "extrapolation_ratio": 0.7691020727947157
+  },
+  "M5_PlusSynapticMemory": {
+    "params": 25090,
+    "latency_ms_per_token": 0.9367999999767562,
+    "state_memory_at_512_bytes": 4352,
+    "state_memory_scaling": {
+      "64": 4352,
+      "128": 4352,
+      "256": 4352,
+      "512": 4352
+    },
+    "mqar_accuracy": 3.150000050663948,
+    "mqar_eval_loss": 3.468845844268799,
+    "mqar_avg_steps": 1.0,
+    "mqar_active_flops_ratio": 1.0,
+    "state_acc_in_domain": 43.44017207622528,
+    "state_acc_extrapolate": 29.63194465637207,
+    "extrapolation_ratio": 0.6821323038126171
+  },
+  "M6_FullPSAN": {
+    "params": 29251,
+    "latency_ms_per_token": 2.0524000000250453,
+    "state_memory_at_512_bytes": 4352,
+    "state_memory_scaling": {
+      "64": 4352,
+      "128": 4352,
+      "256": 4352,
+      "512": 4352
+    },
+    "mqar_accuracy": 2.800000086426735,
+    "mqar_eval_loss": 3.455554962158203,
+    "mqar_avg_steps": 3.90596866607666,
+    "mqar_active_flops_ratio": 0.25,
+    "state_acc_in_domain": 36.840999126434326,
+    "state_acc_extrapolate": 23.30086898803711,
+    "extrapolation_ratio": 0.6324711473777095
+  }
+}

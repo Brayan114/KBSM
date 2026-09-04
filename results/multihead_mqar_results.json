@@ -1,0 +1,50 @@
+{
+  "M0_Transformer": {
+    "params": 140800,
+    "latency_ms_per_token": 0.9205000000003238,
+    "state_ram_bytes_512": 524288,
+    "mqar_accuracy": 26.499998569488525,
+    "eval_loss": 1.9857434034347534,
+    "train_duration_s": 36.048407316207886
+  },
+  "SingleHead_SM (1x32)": {
+    "params": 25090,
+    "latency_ms_per_token": 1.152099999998768,
+    "state_ram_bytes_512": 4352,
+    "mqar_accuracy": 3.2999999821186066,
+    "eval_loss": 3.4589531421661377,
+    "train_duration_s": 176.85593390464783
+  },
+  "MultiHead_SM (H=2, d=16)": {
+    "params": 25254,
+    "latency_ms_per_token": 1.3758000000052562,
+    "state_ram_bytes_512": 2304,
+    "mqar_accuracy": 2.250000089406967,
+    "eval_loss": 3.456407308578491,
+    "train_duration_s": 283.48308062553406
+  },
+  "MultiHead_SM (H=4, d=16)": {
+    "params": 33708,
+    "latency_ms_per_token": 1.0755000000131076,
+    "state_ram_bytes_512": 4352,
+    "mqar_accuracy": 3.700000047683716,
+    "eval_loss": 3.4401915073394775,
+    "train_duration_s": 295.7883105278015
+  },
+  "MultiHead_SM (H=8, d=16)": {
+    "params": 50616,
+    "latency_ms_per_token": 1.178299999992305,
+    "state_ram_bytes_512": 8448,
+    "mqar_accuracy": 2.749999985098839,
+    "eval_loss": 3.4535083770751953,
+    "train_duration_s": 402.9360682964325
+  },
+  "Full_PSAN_MultiHead (H=4)": {
+    "params": 37869,
+    "latency_ms_per_token": 2.3318999999446532,
+    "state_ram_bytes_512": 4352,
+    "mqar_accuracy": 2.549999952316284,
+    "eval_loss": 3.4429707527160645,
+    "train_duration_s": 652.7837674617767
+  }
+}

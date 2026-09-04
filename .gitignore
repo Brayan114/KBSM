@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.class
+
+# PyTorch checkpoints and model weights
+checkpoints/
+*.pt
+*.pth
+*.bin
+*.onnx
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Raw downloaded datasets
+data/wikitext-2/
+wikitext-2/
+*.txt
+
+data/*.zip
+data/*.tar.gz
+
+# Paper manuscript, PDFs, and peer-review submission packages
+paper/
+paper_submission.zip
+*.pdf
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.bbl
+*.blg
+
+# Local scratch files
+chat.md
+scratch/
