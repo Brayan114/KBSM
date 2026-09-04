@@ -1,5 +1,6 @@
 """
-Standard Causal Transformer Baseline with KV-Cache support for exact inference profiling.
+Standard Causal Transformer Baseline with RoPE (Rotary Position Embeddings)
+and KV-Cache support for exact inference profiling and fair MQAR benchmarking.
 """
 
 import math
@@ -7,6 +8,30 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Optional, Tuple, List, Dict, Any
+
+class RotaryEmbedding(nn.Module):
+    def __init__(self, dim: int, max_seq_len: int = 2048):
+        super().__init__()
+        inv_freq = 1.0 / (10000 ** (torch.arange(0, dim, 2).float() / dim))
+        self.register_buffer("inv_freq", inv_freq)
+
+    def forward(self, seq_len: int, device: torch.device) -> torch.Tensor:
+        t = torch.arange(seq_len, device=device).type_as(self.inv_freq)
+        freqs = torch.einsum("i,j->ij", t, self.inv_freq)
+        emb = torch.cat((freqs, freqs), dim=-1)
+        return emb[None, None, :, :]  # (1, 1, T, D)
+
+def rotate_half(x: torch.Tensor) -> torch.Tensor:
+    x1, x2 = x[..., :x.shape[-1] // 2], x[..., x.shape[-1] // 2:]
+    return torch.cat((-x2, x1), dim=-1)
+
+def apply_rotary_pos_emb(q: torch.Tensor, k: torch.Tensor, freqs: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    # q, k: (B, H, T, D), freqs: (1, 1, T, D)
+    cos = freqs.cos()
+    sin = freqs.sin()
+    q_rot = (q * cos) + (rotate_half(q) * sin)
+    k_rot = (k * cos) + (rotate_half(k) * sin)
+    return q_rot, k_rot
 
 class CausalSelfAttention(nn.Module):
     def __init__(self, d_model: int, n_heads: int, max_seq_len: int = 1024, dropout: float = 0.0):
@@ -16,8 +41,8 @@ class CausalSelfAttention(nn.Module):
         self.n_heads = n_heads
         self.head_dim = d_model // n_heads
 
-        self.c_attn = nn.Linear(d_model, 3 * d_model)
-        self.c_proj = nn.Linear(d_model, d_model)
+        self.c_attn = nn.Linear(d_model, 3 * d_model, bias=False)
+        self.c_proj = nn.Linear(d_model, d_model, bias=False)
         self.dropout = nn.Dropout(dropout)
 
         # Register causal mask
@@ -29,6 +54,7 @@ class CausalSelfAttention(nn.Module):
     def forward(
         self,
         x: torch.Tensor,
+        freqs: Optional[torch.Tensor] = None,
         kv_cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None
     ) -> Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
         B, T, C = x.size()
@@ -40,6 +66,9 @@ class CausalSelfAttention(nn.Module):
         q = q.view(B, T, self.n_heads, self.head_dim).transpose(1, 2)
         k = k.view(B, T, self.n_heads, self.head_dim).transpose(1, 2)
         v = v.view(B, T, self.n_heads, self.head_dim).transpose(1, 2)
+
+        if freqs is not None:
+            q, k = apply_rotary_pos_emb(q, k, freqs)
 
         if kv_cache is not None:
             past_k, past_v = kv_cache
@@ -53,9 +82,6 @@ class CausalSelfAttention(nn.Module):
         # Causal masking
         if kv_cache is None:
             att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float('-inf'))
-        else:
-            # During incremental decoding (T=1), new query attends to all past_k + current_k
-            pass
 
         att = F.softmax(att, dim=-1)
         att = self.dropout(att)
@@ -80,9 +106,10 @@ class TransformerBlock(nn.Module):
     def forward(
         self,
         x: torch.Tensor,
+        freqs: Optional[torch.Tensor] = None,
         kv_cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None
     ) -> Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
-        attn_out, new_kv = self.attn(self.ln_1(x), kv_cache=kv_cache)
+        attn_out, new_kv = self.attn(self.ln_1(x), freqs=freqs, kv_cache=kv_cache)
         x = x + attn_out
         x = x + self.mlp(self.ln_2(x))
         return x, new_kv
@@ -93,21 +120,27 @@ class CausalTransformer(nn.Module):
         vocab_size: int = 64,
         d_model: int = 64,
         n_heads: int = 4,
-        n_layers: int = 3,
-        d_ff: int = 256,
+        n_layers: int = 2,
+        d_ff: int = 128,
         max_seq_len: int = 1024,
-        dropout: float = 0.0
+        dropout: float = 0.0,
+        use_rope: bool = True
     ):
         super().__init__()
         self.vocab_size = vocab_size
         self.d_model = d_model
         self.n_heads = n_heads
+        self.head_dim = d_model // n_heads
         self.n_layers = n_layers
         self.d_ff = d_ff
         self.max_seq_len = max_seq_len
+        self.use_rope = use_rope
 
         self.tok_emb = nn.Embedding(vocab_size, d_model)
-        self.pos_emb = nn.Embedding(max_seq_len, d_model)
+        if not use_rope:
+            self.pos_emb = nn.Embedding(max_seq_len, d_model)
+        else:
+            self.rope = RotaryEmbedding(self.head_dim, max_seq_len)
         self.drop = nn.Dropout(dropout)
 
         self.blocks = nn.ModuleList([
@@ -124,13 +157,20 @@ class CausalTransformer(nn.Module):
     ) -> Tuple[torch.Tensor, List[Tuple[torch.Tensor, torch.Tensor]], Dict[str, Any]]:
         B, T = idx.size()
         
-        if kv_caches is None:
-            pos = torch.arange(0, T, dtype=torch.long, device=idx.device).unsqueeze(0)
-            x = self.tok_emb(idx) + self.pos_emb(pos)
+        if self.use_rope:
+            if kv_caches is None:
+                freqs = self.rope(T, idx.device)
+            else:
+                past_len = kv_caches[0][0].size(2)
+                freqs = self.rope(past_len + 1, idx.device)[:, :, past_len:past_len+1, :]
+            x = self.tok_emb(idx)
         else:
-            # During incremental step, position is current cache length
-            past_len = kv_caches[0][0].size(2)
-            pos = torch.tensor([[past_len]], dtype=torch.long, device=idx.device)
+            freqs = None
+            if kv_caches is None:
+                pos = torch.arange(0, T, dtype=torch.long, device=idx.device).unsqueeze(0)
+            else:
+                past_len = kv_caches[0][0].size(2)
+                pos = torch.tensor([[past_len]], dtype=torch.long, device=idx.device)
             x = self.tok_emb(idx) + self.pos_emb(pos)
 
         x = self.drop(x)
@@ -138,7 +178,7 @@ class CausalTransformer(nn.Module):
         new_caches = []
         for i, block in enumerate(self.blocks):
             layer_cache = kv_caches[i] if kv_caches is not None else None
-            x, new_layer_cache = block(x, kv_cache=layer_cache)
+            x, new_layer_cache = block(x, freqs=freqs, kv_cache=layer_cache)
             new_caches.append(new_layer_cache)
 
         x = self.ln_f(x)
@@ -154,11 +194,6 @@ class CausalTransformer(nn.Module):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
 
     def estimate_flops(self, seq_len: int) -> float:
-        """Estimates forward-pass FLOPs for sequence of length seq_len."""
-        # Embeddings: negligible
-        # Per layer:
-        # 1. Self-attention: QKV proj (2 * 3 * d^2 * T), Attn matrix (2 * T^2 * d), Out proj (2 * d^2 * T)
-        # 2. MLP: 2 * (2 * d * d_ff * T)
         layer_flops = (
             (6 * self.d_model**2 * seq_len) +
             (2 * seq_len**2 * self.d_model) +
