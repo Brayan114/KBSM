@@ -69,8 +69,8 @@ Input Tokens X ──► [1D Causal Conv (K=4)] ──► Locally Bound Represen
 
 ### 1. Installation
 ```bash
-git clone https://github.com/your-username/kbsm.git
-cd kbsm
+git clone https://github.com/Brayan114/KBSM.git
+cd KBSM
 pip install torch
 ```
 
@@ -103,7 +103,7 @@ print("Output Logits Shape:", logits.shape) # (4, 256, 256)
 ## 📂 Repository Structure
 
 ```
-bold-turing/
+KBSM/
 ├── benchmarks/
 │   ├── mqar.py                     # Multi-Query Associative Recall benchmark
 │   └── state_tracking.py           # Algorithmic state tracking & extrapolation
@@ -120,13 +120,11 @@ bold-turing/
 │   ├── run_kbsm_experiment.py      # MQAR barrier breakthrough evaluation
 │   ├── scaling_laws.py             # Loss vs. Compute benchmark runner
 │   └── profiler.py                 # Latency, FLOPs, and memory profiling suite
-├── paper/
-│   ├── paper.md                    # Full Research Preprint Manuscript (Markdown)
-│   └── paper.tex                   # Formal LaTeX Manuscript (Ready for arXiv / Overleaf)
 ├── results/
 │   ├── loss_vs_compute_10m.png     # Publication-grade Scaling Law Chart
 │   └── kbsm_mqar_results.json      # Empirical benchmark logs
-└── kbsm_colab_frontier_100m.ipynb  # 1-Click Turnkey Google Colab / Kaggle Notebook
+├── kbsm_colab_scaling_10m.ipynb    # 25.5M Parameter Scaling Notebook
+└── kbsm_colab_frontier_100m.ipynb  # 202.6M Parameter Frontier Scale Notebook
 ```
 
 ---
@@ -134,9 +132,9 @@ bold-turing/
 ## 📝 Citation
 
 ```bibtex
-@article{kbsm2026,
+@article{osinaka2026kbsm,
   title={Kernelized Bound Synaptic Memory: Breaking the Associative Recall Barrier in Fixed-State Sequence Models},
-  author={Deep Learning Architecture Research Group},
+  author={Osinaka, Brayan},
   journal={arXiv preprint},
   year={2026}
 }
